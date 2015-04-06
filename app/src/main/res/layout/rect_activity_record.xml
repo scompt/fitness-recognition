@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.scompt.fitnessrecognition.sample.RecordActivity"
+    tools:deviceIds="wear_square">
+
+    <TextView android:id="@+id/text" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:text="@string/hello_square" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/start_button"
+        android:text="Start"
+        />
+
+    <android.support.wearable.view.DelayedConfirmationView
+        android:id="@+id/delayed_confirm"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_full_cancel"
+        app:circle_border_color="@android:color/holo_blue_bright"
+        app:circle_border_width="4dp"
+        app:circle_radius="16dp">
+    </android.support.wearable.view.DelayedConfirmationView>
+</LinearLayout>
