@@ -1,0 +1,29 @@
+apply plugin: 'java'
+apply plugin: 'gradle-one-jar'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.github.rholder:gradle-one-jar:1.0.4'
+    }
+}
+
+targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_1_8
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':common')
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.scompt.fitnessrecognition.processor.Main'
+    }
+}
+
+task fatJar(type: OneJar) {
+    mainClass = 'com.scompt.fitnessrecognition.processor.Main'
+}
