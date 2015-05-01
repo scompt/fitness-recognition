@@ -34,6 +34,8 @@ public class PeakDetProcessor implements Processor {
                 minValue = magnitude;
                 minTimestamp = timestamp;
                 lookForMax = false;
+
+                // Only emit mins
                 return false;
             }
         } else {
@@ -46,7 +48,6 @@ public class PeakDetProcessor implements Processor {
             }
         }
 
-        System.out.format("%d, %f\n", timestamp, magnitude);
         return false;
     }
 }
