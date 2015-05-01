@@ -4,6 +4,7 @@
 
     <uses-feature android:name="android.hardware.type.watch" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
         android:allowBackup="true"
@@ -22,6 +23,10 @@
         <activity
             android:name=".RecordActivity"
             android:label="@string/title_activity_record" >
+        </activity>
+        <activity
+            android:name=".TrackPushupsActivity"
+            android:label="@string/title_activity_track_pushups" >
         </activity>
         <activity
             android:name="android.support.wearable.activity.ConfirmationActivity">
