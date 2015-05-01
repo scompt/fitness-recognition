@@ -12,36 +12,37 @@ import android.util.Log;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.List;
 
-/**
- * Created by scompt on 11/04/15.
- */
 public class SensorRecorder {
 
     private static final String LOG_TAG = SensorRecorder.class.getSimpleName();
+    private static final IntentFilter BATTERY_CHANGED_FILTER =
+            new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
 
     private final SensorManager mSensorManager;
     private Context mContext;
     private File file;
     private ObjectOutputStream outputStream;
-    private FileWriter fileWriter;
+    private float[] mCachedPoints = new float[CACHED_TIMESTAMP_COUNT * POINTS_PER_TIMESTAMP];
+    private long[] mCachedTimestamps = new long[CACHED_TIMESTAMP_COUNT];
+    private int mCacheOffset;
+
+    private static final int POINTS_PER_TIMESTAMP = 3;
+    private static final int CACHED_TIMESTAMP_COUNT = 10;
 
     public SensorRecorder(Context context, File file) {
         mContext = context;
         this.file = file;
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-
     }
 
     public void start() throws IOException {
-//        outputStream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
-        fileWriter = new FileWriter(file);
+        outputStream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+
         recordBatteryInformation();
 
         List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
@@ -49,48 +50,48 @@ public class SensorRecorder {
     }
 
     public void stop() throws IOException {
-        List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
         mSensorManager.unregisterListener(mListener);
 
         recordBatteryInformation();
-        fileWriter.close();
+        outputStream.close();
     }
 
     private void recordBatteryInformation() throws IOException {
-        Intent batteryIntent = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        Intent batteryIntent = mContext.registerReceiver(null, BATTERY_CHANGED_FILTER);
+        if (batteryIntent == null) {
+            Log.w(LOG_TAG, "batteryIntent was null");
+            return;
+        }
+
         int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
-        // Error checking that probably isn't needed but I added just in case.
-        if(level == -1 || scale == -1) {
-            fileWriter.write("-1\n");
-
-        } else {
+        if(level != -1 && scale != -1) {
+            outputStream.writeInt(1);
             float batteryPercentage = ((float) level / (float) scale) * 100.0f;
-            fileWriter.write(String.valueOf(batteryPercentage));
-            fileWriter.write('\n');
+            outputStream.writeFloat(batteryPercentage);
         }
     }
 
     private final SensorEventListener mListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
-            try {
-/*
-                outputStream.writeLong(event.timestamp);
-                outputStream.writeFloat(event.values[0]);
-                outputStream.writeFloat(event.values[1]);
-                outputStream.writeFloat(event.values[2]);
-*/
-                fileWriter.write(String.valueOf(event.timestamp));
-                fileWriter.write(',');
-                fileWriter.write(String.valueOf(event.values[0]));
-                fileWriter.write(',');
-                fileWriter.write(String.valueOf(event.values[1]));
-                fileWriter.write(',');
-                fileWriter.write(String.valueOf(event.values[2]));
-                fileWriter.write('\n');
+            mCachedTimestamps[mCacheOffset] = event.timestamp;
+            mCachedPoints[mCacheOffset * POINTS_PER_TIMESTAMP    ] = event.values[0];
+            mCachedPoints[mCacheOffset * POINTS_PER_TIMESTAMP + 1] = event.values[1];
+            mCachedPoints[mCacheOffset * POINTS_PER_TIMESTAMP + 2] = event.values[2];
 
+            try {
+                if (++mCacheOffset == CACHED_TIMESTAMP_COUNT) {
+                    outputStream.writeInt(0);
+                    for (int i = 0; i < mCacheOffset; i++) {
+                        outputStream.writeLong(mCachedTimestamps[i]);
+                        outputStream.writeFloat(mCachedPoints[i * POINTS_PER_TIMESTAMP]);
+                        outputStream.writeFloat(mCachedPoints[i * POINTS_PER_TIMESTAMP + 1]);
+                        outputStream.writeFloat(mCachedPoints[i * POINTS_PER_TIMESTAMP + 2]);
+                    }
+                    mCacheOffset = 0;
+                }
             } catch (IOException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
             }
@@ -100,5 +101,4 @@ public class SensorRecorder {
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
         }
     };
-
 }
