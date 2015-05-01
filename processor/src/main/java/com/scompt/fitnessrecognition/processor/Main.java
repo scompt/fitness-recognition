@@ -1,5 +1,6 @@
 package com.scompt.fitnessrecognition.processor;
 
+import com.scompt.fitnessrecognition.common.Constants;
 import com.scompt.fitnessrecognition.common.PeakDetProcessor;
 import com.scompt.fitnessrecognition.common.Processor;
 import com.scompt.fitnessrecognition.common.SystemOutProcessor;
@@ -11,7 +12,6 @@ import java.util.List;
 
 public class Main {
 
-    public static final int CHUNK_SIZE = 10;
     public static final int DELTA = 20;
 
     private static List<Float> maxes = new ArrayList<>();
@@ -26,12 +26,12 @@ public class Main {
                 int chunkType = objectInputStream.readInt();
 
                 switch (chunkType) {
-                    case 0:
-                        processDataChunk(processor, objectInputStream);
+                    case Constants.BATTERY_CHUNK_TYPE:
+                        processBatteryChunk(objectInputStream);
                         break;
 
-                    case 1:
-                        processBatteryChunk(objectInputStream);
+                    case Constants.DATA_CHUNK_TYPE:
+                        processDataChunk(processor, objectInputStream);
                         break;
 
                     default:
@@ -55,7 +55,7 @@ public class Main {
     }
 
     private static void processDataChunk(Processor processor, ObjectInputStream objectInputStream) throws IOException {
-        for (int i = 0; i < CHUNK_SIZE; i++) {
+        for (int i = 0; i < Constants.CHUNK_SIZE; i++) {
             long timestamp = objectInputStream.readLong();
             float value1 = objectInputStream.readFloat();
             float value2 = objectInputStream.readFloat();

@@ -10,6 +10,8 @@ import android.hardware.SensorManager;
 import android.os.BatteryManager;
 import android.util.Log;
 
+import com.scompt.fitnessrecognition.common.Constants;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,12 +29,11 @@ public class SensorRecorder {
     private Context mContext;
     private File file;
     private ObjectOutputStream outputStream;
-    private float[] mCachedPoints = new float[CACHED_TIMESTAMP_COUNT * POINTS_PER_TIMESTAMP];
-    private long[] mCachedTimestamps = new long[CACHED_TIMESTAMP_COUNT];
+    private float[] mCachedPoints = new float[Constants.CHUNK_SIZE * POINTS_PER_TIMESTAMP];
+    private long[] mCachedTimestamps = new long[Constants.CHUNK_SIZE];
     private int mCacheOffset;
 
     private static final int POINTS_PER_TIMESTAMP = 3;
-    private static final int CACHED_TIMESTAMP_COUNT = 10;
 
     public SensorRecorder(Context context, File file) {
         mContext = context;
@@ -67,7 +68,7 @@ public class SensorRecorder {
         int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
         if(level != -1 && scale != -1) {
-            outputStream.writeInt(1);
+            outputStream.writeInt(Constants.BATTERY_CHUNK_TYPE);
             float batteryPercentage = ((float) level / (float) scale) * 100.0f;
             outputStream.writeFloat(batteryPercentage);
         }
@@ -82,8 +83,8 @@ public class SensorRecorder {
             mCachedPoints[mCacheOffset * POINTS_PER_TIMESTAMP + 2] = event.values[2];
 
             try {
-                if (++mCacheOffset == CACHED_TIMESTAMP_COUNT) {
-                    outputStream.writeInt(0);
+                if (++mCacheOffset == Constants.CHUNK_SIZE) {
+                    outputStream.writeInt(Constants.DATA_CHUNK_TYPE);
                     for (int i = 0; i < mCacheOffset; i++) {
                         outputStream.writeLong(mCachedTimestamps[i]);
                         outputStream.writeFloat(mCachedPoints[i * POINTS_PER_TIMESTAMP]);
