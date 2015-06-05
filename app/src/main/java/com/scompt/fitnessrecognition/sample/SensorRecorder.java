@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.List;
 
+import static com.scompt.fitnessrecognition.sample.Constants.SENSOR_DELAY;
+import static com.scompt.fitnessrecognition.sample.Constants.SENSOR_TYPE;
+
 public class SensorRecorder {
 
     private static final String LOG_TAG = SensorRecorder.class.getSimpleName();
@@ -46,8 +49,8 @@ public class SensorRecorder {
 
         recordBatteryInformation();
 
-        List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
-        mSensorManager.registerListener(mListener, sensors.get(0), SensorManager.SENSOR_DELAY_FASTEST);
+        List<Sensor> sensors = mSensorManager.getSensorList(SENSOR_TYPE);
+        mSensorManager.registerListener(mListener, sensors.get(0), SENSOR_DELAY);
     }
 
     public void stop() throws IOException {

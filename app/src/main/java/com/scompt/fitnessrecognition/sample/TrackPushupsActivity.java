@@ -10,16 +10,20 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.widget.TextView;
 
+import com.scompt.fitnessrecognition.common.Constants;
 import com.scompt.fitnessrecognition.common.PeakDetProcessor;
 import com.scompt.fitnessrecognition.common.Processor;
 
 import java.util.List;
 
+import static com.scompt.fitnessrecognition.sample.Constants.SENSOR_DELAY;
+import static com.scompt.fitnessrecognition.sample.Constants.SENSOR_TYPE;
+
 public class TrackPushupsActivity extends Activity {
 
     private TextView mTextView;
     private SensorManager mSensorManager;
-    private final Processor mProcessor = new PeakDetProcessor(20);
+    private final Processor mProcessor = new PeakDetProcessor(Constants.DELTA);
     private SensorEventListener mListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -59,8 +63,8 @@ public class TrackPushupsActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
-        mSensorManager.registerListener(mListener, sensors.get(0), SensorManager.SENSOR_DELAY_FASTEST);
+        List<Sensor> sensors = mSensorManager.getSensorList(SENSOR_TYPE);
+        mSensorManager.registerListener(mListener, sensors.get(0), SENSOR_DELAY);
     }
 
     @Override

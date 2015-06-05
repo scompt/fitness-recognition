@@ -10,12 +10,10 @@ import java.io.ObjectInputStream;
 
 public class Main {
 
-    public static final int DELTA = 20;
-
     private long mMinimumTimestamp = -1;
 
     public static void main(String[] args) throws IOException {
-        Processor processor = new PeakDetProcessor(DELTA);
+        Processor processor = new PeakDetProcessor(Constants.DELTA);
 //        Processor processor = new SystemOutProcessor();
 
         new Main().processStream(System.in, processor);
@@ -61,7 +59,7 @@ public class Main {
 
             boolean signal = processor.processPoint(timestamp, value1, value2, value3);
 
-            System.out.format("%d, %f, %d\n", timestamp - mMinimumTimestamp, magnitude, signal ? 1 : 0);
+            System.out.format("%d, %f, %d\n", timestamp - mMinimumTimestamp, magnitude, signal ? -10 : 0);
         }
     }
 }
